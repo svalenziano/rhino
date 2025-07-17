@@ -23,13 +23,16 @@ NOTE:
 """
 #! python3
 
-import rhinoscriptsyntax as rs
-import scriptcontext as sc
-import math
-
-import System
-import System.Collections.Generic
-import Rhino
+# import math
 
 
-print("Hello world! - v3!!!!")
+def func(x):
+    return x + 1
+
+if __name__ == '__main__':
+    import System
+    import System.Collections.Generic
+    import rhinoscriptsyntax as rs
+    import scriptcontext as sc
+    import Rhino
+    print("Hello world! - v3!!!!")

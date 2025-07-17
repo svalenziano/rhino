@@ -1,3 +1,9 @@
+import sys
+import os
+dir_to_search = os.path.join(os.path.dirname(__file__), '../src/sv_rhino/')
+sys.path.append(os.path.abspath(dir_to_search))
+from hello_world import func
+
 """
 NOTE:
 
@@ -34,8 +40,7 @@ NOTE:
 
 
 # content of test_sample.py
-def func(x):
-    return x + 1
+
 
 
 def test_answer():
@@ -43,3 +48,7 @@ def test_answer():
 
 def test_should_pass():
     assert func(1) == 2
+
+if __name__ == "__main__":
+    test_answer()
+    test_should_pass()
