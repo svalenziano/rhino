@@ -40,3 +40,6 @@ def func(x):
 
 def test_answer():
     assert func(3) == 5
+
+def test_should_pass():
+    assert func(1) == 2
