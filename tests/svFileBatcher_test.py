@@ -17,11 +17,11 @@ NOTE:
     using pip-like package specifiers:
 
     # r: pytoml==0.10.2, keras>=2.6.0
+    # r: pytest>=8.4.1
 
 - Use env directive to add an environment path to sys.path automatically
     # env: /path/to/your/site-packages/
 """
-# r: pytest >= 8.4.1
 #! python3
 
 # import rhinoscriptsyntax as rs
