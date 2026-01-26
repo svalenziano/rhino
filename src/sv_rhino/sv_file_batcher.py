@@ -36,7 +36,7 @@ from Rhino.UI import OpenFileDialog
 
 # import System.Windows.Forms  # Add this import
 
-def pick_folder(msg="Pick a folder"):
+def pick_folder(msg="Pick a folder") -> str | None:
     # https://learn.microsoft.com/en-us/dotnet/api/system.windows.forms.folderbrowserdialog?view=windowsdesktop-9.0
     dlg = System.Windows.Forms.FolderBrowserDialog()
     dlg.Description = msg
