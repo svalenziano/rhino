@@ -334,7 +334,7 @@ def process_document(input_path, funcs, exporters):
     orig_filename = os.path.splitext(input_path)[0]
     doc = Rhino.RhinoDoc.CreateHeadless(None)
     try:
-        doc.Import(input_path, False)
+        doc.Import(input_path)
         for func in funcs:
             func(doc)
         for exporter in exporters:
@@ -365,6 +365,7 @@ def doc_batcher(input_path, output_path, operations, exporters=None):
     files = create_file_list(input_path, extensions=["dwg"])
     files = filter_files_with_matching_3dm(files)
     error_log_path = os.path.join(output_path, "error_log.txt")
+    open(error_log_path, "w").close()
     for file_path in files:
         try:
             process_document(file_path, funcs=operations, exporters=exporters)
@@ -381,12 +382,8 @@ def run():
     """
     import functools
 
-    input_path = pick_folder("Pick input folder (DWG files)")
-    if input_path is None:
-        return
-    output_path = pick_folder("Pick output folder (exports + error_log)")
-    if output_path is None:
-        return
+    input_path = r"C:\Users\senor\OneDrive\Desktop\temp\batch_test\input"
+    output_path = r"C:\Users\senor\OneDrive\Desktop\temp\batch_test\output"
 
     ops = [
         explode_all_blocks,

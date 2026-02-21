@@ -3,7 +3,8 @@
     "allow": [
       "Bash(pdm run:*)",
       "Bash(git add:*)",
-      "Bash(git:*)"
+      "Bash(git:*)",
+      "WebFetch(domain:developer.rhino3d.com)"
     ]
   }
 }
