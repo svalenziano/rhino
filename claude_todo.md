@@ -15,7 +15,7 @@ The readme describes a batch-processing pipeline for Rhino 3D CAD files. The goa
   - `pick_folder()`, `pick_files()` → Rhino UI dialogs (Rhino-dependent)
 - **Test file:** `tests/sv_file_batcher_test.py` — only tests `hello_world.func`, nothing from file batcher yet
 - **Test data:** `tests/dwgs/` — 9 real DWG files available as fixtures
-- No `__init__.py` files; tests use `sys.path.append` to import from `src/sv_rhino/`
+- ~~No `__init__.py` files; tests use `sys.path.append` to import from `src/sv_rhino/`~~ **Fixed:** `pyproject.toml` now has `[tool.pytest.ini_options] pythonpath = ["src"]`; test imports use `from sv_rhino.x import y`
 
 ---
 

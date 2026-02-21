@@ -1,8 +1,4 @@
-import sys
-import os
-dir_to_search = os.path.join(os.path.dirname(__file__), '../src/sv_rhino/')
-sys.path.append(os.path.abspath(dir_to_search))
-from hello_world import func
+from sv_rhino.hello_world import func
 
 """
 NOTE:
