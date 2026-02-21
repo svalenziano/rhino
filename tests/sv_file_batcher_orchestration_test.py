@@ -90,7 +90,7 @@ def test_doc_batcher_skips_already_processed(tmp_path):
     mock_proc.assert_not_called()
 
 
-def test_doc_batcher_writes_error_log_on_failure(tmp_path):
+def test_doc_batcher_writes_error_log_on_failure(capsys, tmp_path):
     files = ["/input/bad.dwg"]
 
     with patch("sv_rhino.sv_file_batcher.create_file_list", return_value=files), \
@@ -103,3 +103,32 @@ def test_doc_batcher_writes_error_log_on_failure(tmp_path):
     content = error_log.read_text()
     assert "/input/bad.dwg" in content
     assert "failed" in content
+
+    out = capsys.readouterr().out
+    assert "error" in out.lower()
+    assert "error_log.txt" in out
+
+
+def test_doc_batcher_prints_success(capsys, tmp_path):
+    files = ["/input/a.dwg", "/input/b.dwg"]
+    mock_exporter = MagicMock()
+    with patch("sv_rhino.sv_file_batcher.create_file_list", return_value=files), \
+         patch("sv_rhino.sv_file_batcher.filter_files_with_matching_3dm", return_value=files), \
+         patch("sv_rhino.sv_file_batcher.process_document"):
+        batcher.doc_batcher("/input", str(tmp_path), operations=[], exporters=[mock_exporter])
+    out = capsys.readouterr().out
+    assert "Success" in out
+    assert "2" in out
+    assert str(tmp_path) in out
+
+
+def test_doc_batcher_prints_error_summary(capsys, tmp_path):
+    files = ["/input/bad.dwg"]
+    with patch("sv_rhino.sv_file_batcher.create_file_list", return_value=files), \
+         patch("sv_rhino.sv_file_batcher.filter_files_with_matching_3dm", return_value=files), \
+         patch("sv_rhino.sv_file_batcher.process_document", side_effect=RuntimeError("fail")):
+        batcher.doc_batcher("/input", str(tmp_path), operations=[])
+    out = capsys.readouterr().out
+    assert "1" in out
+    assert "error" in out.lower()
+    assert "error_log.txt" in out

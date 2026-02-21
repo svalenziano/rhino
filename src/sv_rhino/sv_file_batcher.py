@@ -264,8 +264,13 @@ def join_all(doc):
 
 def by_parent(doc):
     """
-    Rhino-dependent. Set display properties (DisplayColor, LinetypeSource,
-    PlotColorSource, etc.) to ByParent on all objects in the document.
+    Rhino-dependent. Set all display properties to ByParent on every object
+    in the document. The five attributes set are:
+      - ColorSource        → ColorFromParent
+      - LinetypeSource     → LinetypeFromParent
+      - PlotColorSource    → PlotColorFromParent  (Print Color)
+      - PlotWeightSource   → PlotWeightFromParent
+      - SectionAttributesSource → FromParent      (Section Style, Rhino 8+)
 
     Args:
         doc: RhinoDoc instance
@@ -274,12 +279,14 @@ def by_parent(doc):
     LS  = Rhino.DocObjects.ObjectLinetypeSource
     PCS = Rhino.DocObjects.ObjectPlotColorSource
     PWS = Rhino.DocObjects.ObjectPlotWeightSource
+    SAS = Rhino.DocObjects.SectionAttributesSource
     for obj in doc.Objects:
         attr = obj.Attributes.Duplicate()
-        attr.ColorSource      = CS.ColorFromParent
-        attr.LinetypeSource   = LS.LinetypeFromParent
-        attr.PlotColorSource  = PCS.PlotColorFromParent
-        attr.PlotWeightSource = PWS.PlotWeightFromParent
+        attr.ColorSource             = CS.ColorFromParent
+        attr.LinetypeSource          = LS.LinetypeFromParent
+        attr.PlotColorSource         = PCS.PlotColorFromParent
+        attr.PlotWeightSource        = PWS.PlotWeightFromParent
+        attr.SectionAttributesSource = SAS.FromParent
         doc.Objects.ModifyAttributes(obj, attr, True)
 
 
@@ -369,12 +376,21 @@ def doc_batcher(input_path, output_path, operations, exporters=None):
     files = filter_files_with_matching_3dm(files)
     error_log_path = os.path.join(output_path, "error_log.txt")
     open(error_log_path, "w").close()
+    error_count = 0
     for file_path in files:
         try:
             process_document(file_path, funcs=operations, exporters=exporters, output_path=output_path)
         except Exception as e:
+            error_count += 1
             with open(error_log_path, "a") as f:
                 f.write(f"{file_path}: {e}\n")
+    if error_count == 0:
+        if exporters:
+            print(f"Success! {len(files)} file(s) processed and saved to {output_path}")
+        else:
+            print(f"Success! {len(files)} file(s) processed.")
+    else:
+        print(f"{error_count} error(s) occurred. See {error_log_path} for details.")
 
 
 def run():
@@ -399,7 +415,6 @@ def run():
     ]
 
     doc_batcher(input_path, output_path, operations=ops, exporters=exporters)
-    print("Done. Check output folder and error_log.txt if any files failed.")
 
 
 if __name__ == "__main__":
