@@ -270,7 +270,7 @@ def by_parent(doc):
       - LinetypeSource     → LinetypeFromParent
       - PlotColorSource    → PlotColorFromParent  (Print Color)
       - PlotWeightSource   → PlotWeightFromParent
-      - SectionAttributesSource → FromParent      (Section Style, Rhino 8+)
+      - SectionAttributesSource → FromParent      (Section Style, Rhino 8+; enum: ObjectSectionAttributesSource)
 
     Args:
         doc: RhinoDoc instance
@@ -279,7 +279,7 @@ def by_parent(doc):
     LS  = Rhino.DocObjects.ObjectLinetypeSource
     PCS = Rhino.DocObjects.ObjectPlotColorSource
     PWS = Rhino.DocObjects.ObjectPlotWeightSource
-    SAS = Rhino.DocObjects.SectionAttributesSource
+    SAS = Rhino.DocObjects.ObjectSectionAttributesSource
     for obj in doc.Objects:
         attr = obj.Attributes.Duplicate()
         attr.ColorSource             = CS.ColorFromParent
