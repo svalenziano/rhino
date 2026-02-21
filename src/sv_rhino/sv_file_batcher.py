@@ -23,6 +23,7 @@ try:
     RHINO_AVAILABLE = True
 except ImportError:
     RHINO_AVAILABLE = False
+    Rhino = rs = sc = System = None
 
 
 # ---------------------------------------------------------------------------
@@ -173,7 +174,17 @@ def remove_layers(doc, regex_patterns):
         doc: RhinoDoc instance
         regex_patterns: list of regex strings to match layer names against
     """
-    pass
+    import re
+    compiled = [re.compile(p) for p in regex_patterns]
+    to_delete = [
+        layer.Index for layer in doc.Layers
+        if not layer.IsDeleted and any(p.search(layer.Name) for p in compiled)
+    ]
+    for idx in to_delete:
+        for obj in doc.Objects.FindByLayer(doc.Layers[idx]):
+            doc.Objects.Delete(obj, True)
+    for idx in sorted(to_delete, reverse=True):
+        doc.Layers.Delete(idx, True)
 
 
 def explode_all_blocks(doc):
@@ -184,7 +195,28 @@ def explode_all_blocks(doc):
     Args:
         doc: RhinoDoc instance
     """
-    pass
+    while True:
+        instances = list(doc.Objects.FindByObjectType(
+            Rhino.DocObjects.ObjectType.InstanceReference))
+        if not instances:
+            break
+        any_exploded = False
+        for inst in instances:
+            idef = inst.InstanceDefinition
+            xform = inst.InstanceXform
+            added = False
+            for sub_obj in idef.GetObjects():
+                geo = sub_obj.Geometry.Duplicate()
+                if geo.Transform(xform):
+                    doc.Objects.Add(geo, sub_obj.Attributes.Duplicate())
+                    added = True
+            if added:
+                doc.Objects.Delete(inst, True)
+                any_exploded = True
+            else:
+                print(f"Warning: could not explode block {inst.Attributes.ObjectId}")
+        if not any_exploded:
+            break
 
 
 def layer0(doc):
@@ -195,7 +227,17 @@ def layer0(doc):
     Args:
         doc: RhinoDoc instance
     """
-    pass
+    existing = doc.Layers.FindName("0")
+    layer0_idx = existing.Index if existing else doc.Layers.Add(
+        "0", System.Drawing.Color.Black)
+    for obj in doc.Objects:
+        attr = obj.Attributes.Duplicate()
+        attr.LayerIndex = layer0_idx
+        doc.Objects.ModifyAttributes(obj, attr, True)
+    to_delete = [l.Index for l in doc.Layers
+                 if not l.IsDeleted and l.Index != layer0_idx]
+    for idx in sorted(to_delete, reverse=True):
+        doc.Layers.Delete(idx, True)
 
 
 def join_all(doc):
@@ -206,7 +248,18 @@ def join_all(doc):
     Args:
         doc: RhinoDoc instance
     """
-    pass
+    curve_objs = list(doc.Objects.FindByObjectType(
+        Rhino.DocObjects.ObjectType.Curve))
+    if not curve_objs:
+        return
+    curves = [obj.CurveGeometry for obj in curve_objs]
+    joined = Rhino.Geometry.Curve.JoinCurves(curves, doc.ModelAbsoluteTolerance)
+    if not joined:
+        return
+    for obj in curve_objs:
+        doc.Objects.Delete(obj, True)
+    for curve in joined:
+        doc.Objects.AddCurve(curve)
 
 
 def by_parent(doc):
@@ -217,7 +270,17 @@ def by_parent(doc):
     Args:
         doc: RhinoDoc instance
     """
-    pass
+    CS  = Rhino.DocObjects.ObjectColorSource
+    LS  = Rhino.DocObjects.ObjectLinetypeSource
+    PCS = Rhino.DocObjects.ObjectPlotColorSource
+    PWS = Rhino.DocObjects.ObjectPlotWeightSource
+    for obj in doc.Objects:
+        attr = obj.Attributes.Duplicate()
+        attr.ColorSource      = CS.ColorFromParent
+        attr.LinetypeSource   = LS.LinetypeFromParent
+        attr.PlotColorSource  = PCS.PlotColorFromParent
+        attr.PlotWeightSource = PWS.PlotWeightFromParent
+        doc.Objects.ModifyAttributes(obj, attr, True)
 
 
 def dwg_exporter(doc, orig_filename, suffixes):
@@ -231,7 +294,10 @@ def dwg_exporter(doc, orig_filename, suffixes):
         orig_filename: original input filename stem (without extension)
         suffixes: list of suffix strings (e.g. ['-plan', '-elevation'])
     """
-    pass
+    for suffix in suffixes:
+        out_path = orig_filename + suffix + ".dwg"
+        opts = Rhino.FileIO.FileDwgWriteOptions()
+        Rhino.FileIO.FileDwg.Write(out_path, doc, opts)
 
 
 def svg_exporter(doc, orig_filename, suffixes):
@@ -244,7 +310,10 @@ def svg_exporter(doc, orig_filename, suffixes):
         orig_filename: original input filename stem (without extension)
         suffixes: list of suffix strings (e.g. ['-plan', '-elevation'])
     """
-    pass
+    for suffix in suffixes:
+        out_path = orig_filename + suffix + ".svg"
+        opts = Rhino.FileIO.FileSvgWriteOptions()
+        Rhino.FileIO.FileSvg.Write(out_path, doc, opts)
 
 
 def process_document(input_path, funcs, exporters):
@@ -260,12 +329,20 @@ def process_document(input_path, funcs, exporters):
     Args:
         input_path: absolute path to the input file
         funcs: list of callables accepting (doc,)
-        exporters: list of callables accepting (doc, orig_filename, suffixes)
+        exporters: list of callables accepting (doc, orig_filename)
     """
-    pass
+    orig_filename = os.path.splitext(input_path)[0]
+    doc = Rhino.RhinoDoc.OpenHeadless(input_path)
+    try:
+        for func in funcs:
+            func(doc)
+        for exporter in exporters:
+            exporter(doc, orig_filename)
+    finally:
+        doc.Dispose()
 
 
-def doc_batcher(input_path, output_path, operations):
+def doc_batcher(input_path, output_path, operations, exporters=None):
     """
     Rhino-dependent. Top-level orchestrator for batch processing.
 
@@ -279,8 +356,20 @@ def doc_batcher(input_path, output_path, operations):
         output_path: directory for exported files and error_log.txt
         operations: list of doc-operation callables (e.g. remove_layers,
                     explode_all_blocks, layer0, join_all, by_parent)
+        exporters: list of exporter callables accepting (doc, orig_filename);
+                   use functools.partial to pre-bind suffixes. Defaults to [].
     """
-    pass
+    if exporters is None:
+        exporters = []
+    files = create_file_list(input_path, extensions=["dwg"])
+    files = filter_files_with_matching_3dm(files)
+    error_log_path = os.path.join(output_path, "error_log.txt")
+    for file_path in files:
+        try:
+            process_document(file_path, funcs=operations, exporters=exporters)
+        except Exception as e:
+            with open(error_log_path, "a") as f:
+                f.write(f"{file_path}: {e}\n")
 
 
 if __name__ == "__main__":
