@@ -18,7 +18,7 @@ def test_process_document_calls_funcs_in_order():
     manager.attach_mock(func_b, "func_b")
 
     with patch("sv_rhino.sv_file_batcher.Rhino") as mock_rhino:
-        mock_rhino.RhinoDoc.OpenHeadless.return_value = mock_doc
+        mock_rhino.RhinoDoc.CreateHeadless.return_value = mock_doc
         batcher.process_document("/in/file.dwg", funcs=[func_a, func_b], exporters=[])
 
     assert func_a.call_args_list == [call(mock_doc)]
@@ -34,7 +34,7 @@ def test_process_document_calls_exporters():
     exporter = MagicMock()
 
     with patch("sv_rhino.sv_file_batcher.Rhino") as mock_rhino:
-        mock_rhino.RhinoDoc.OpenHeadless.return_value = mock_doc
+        mock_rhino.RhinoDoc.CreateHeadless.return_value = mock_doc
         batcher.process_document("/in/file.dwg", funcs=[], exporters=[exporter])
 
     exporter.assert_called_once_with(mock_doc, "/in/file")
@@ -44,7 +44,7 @@ def test_process_document_disposes_on_success():
     mock_doc = MagicMock()
 
     with patch("sv_rhino.sv_file_batcher.Rhino") as mock_rhino:
-        mock_rhino.RhinoDoc.OpenHeadless.return_value = mock_doc
+        mock_rhino.RhinoDoc.CreateHeadless.return_value = mock_doc
         batcher.process_document("/in/file.dwg", funcs=[], exporters=[])
 
     mock_doc.Dispose.assert_called_once()
@@ -55,7 +55,7 @@ def test_process_document_disposes_on_exception():
     bad_func = MagicMock(side_effect=RuntimeError("boom"))
 
     with patch("sv_rhino.sv_file_batcher.Rhino") as mock_rhino:
-        mock_rhino.RhinoDoc.OpenHeadless.return_value = mock_doc
+        mock_rhino.RhinoDoc.CreateHeadless.return_value = mock_doc
         with pytest.raises(RuntimeError, match="boom"):
             batcher.process_document("/in/file.dwg", funcs=[bad_func], exporters=[])
 

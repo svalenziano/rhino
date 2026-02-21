@@ -42,5 +42,9 @@ The following functions require a live Rhino 8 environment and **cannot** be uni
 - `dwg_exporter`, `svg_exporter`
 - `process_document`, `doc_batcher` (partially Rhino-dependent)
 
+## Rhino documentation
+- RhinoCommon: https://developer.rhino3d.com/api/rhinocommon/
+- rhinoscriptsyntax: https://developer.rhino3d.com/api/RhinoScriptSyntax/
+
 ## Todo
 See `claude_todo.md` for the current implementation checklist.

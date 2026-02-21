@@ -332,8 +332,9 @@ def process_document(input_path, funcs, exporters):
         exporters: list of callables accepting (doc, orig_filename)
     """
     orig_filename = os.path.splitext(input_path)[0]
-    doc = Rhino.RhinoDoc.OpenHeadless(input_path)
+    doc = Rhino.RhinoDoc.CreateHeadless(None)
     try:
+        doc.Import(input_path, False)
         for func in funcs:
             func(doc)
         for exporter in exporters:
