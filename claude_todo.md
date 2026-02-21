@@ -40,7 +40,7 @@ except ImportError:
 ## Tasks: `src/sv_rhino/sv_file_batcher.py`
 
 ### Rhino Import Guard
-- [ ] Wrap `rhinoscriptsyntax`, `scriptcontext`, `Rhino`, `System` imports in `try/except ImportError`
+- [x] Wrap `rhinoscriptsyntax`, `scriptcontext`, `Rhino`, `System` imports in `try/except ImportError`
 
 ### Pure Python Functions (unit-testable)
 
@@ -51,56 +51,56 @@ Replaces/supersedes `get_all_files()` + `filter_extension()`. Returns list of **
 - Sorts results for deterministic output
 - Keep `get_all_files` and `filter_extension` as internal helpers
 
-- [ ] Implement `create_file_list`
+- [x] Implement `create_file_list`
 
 #### `filter_files_with_matching_3dm(paths, suffix="_sv")`
 Implement the existing stub. A file is "matched" (filtered OUT) if a `.3dm` file exists alongside it with the given suffix pattern.
 - Pattern: `filename.dwg` is matched if `filename{suffix}.3dm` or `filename{suffix}-*.3dm` exists in the same directory
 - Returns paths with no matching `.3dm` (i.e., files that still need processing)
 
-- [ ] Implement `filter_files_with_matching_3dm`
+- [x] Implement `filter_files_with_matching_3dm`
 
 ### Rhino-Dependent Functions (stubs with clear docstrings now; full impl later)
 All Rhino functions accept a `RhinoDoc` object as their first argument.
 
 #### `remove_layers(doc, regex_patterns: list[str])`
 Delete all layers (and their geometry) whose names match any regex in the list.
-- [ ] Write stub + docstring
+- [x] Write stub + docstring
 
 #### `explode_all_blocks(doc)`
 Recursively explode all block instances until no blocks remain. Log failures.
-- [ ] Write stub + docstring
+- [x] Write stub + docstring
 
 #### `layer0(doc)`
 Create layer `0` if missing, move all geometry to it, purge all other layers.
-- [ ] Write stub + docstring
+- [x] Write stub + docstring
 
 #### `join_all(doc)`
 Join all curves/lines. Intent: clean up fragmented linework.
-- [ ] Write stub + docstring
+- [x] Write stub + docstring
 
 #### `by_parent(doc)` *(renamed from `byParent` to snake_case)*
 Set `DisplayColor`, `LinetypeSource`, `PlotColorSource`, etc. to `ByParent` on all objects.
-- [ ] Write stub + docstring
+- [x] Write stub + docstring
 
 #### `dwg_exporter(doc, orig_filename: str, suffixes: list[str])`
 Export one DWG file per suffix. E.g. `suffixes=['-elevation']` → `filename-elevation.dwg`.
-- [ ] Write stub + docstring
+- [x] Write stub + docstring
 
 #### `svg_exporter(doc, orig_filename: str, suffixes: list[str])`
 Same pattern as `dwg_exporter` but exports SVG.
-- [ ] Write stub + docstring
+- [x] Write stub + docstring
 
 #### `process_document(input_path: str, funcs: list, exporters: list)`
 Owns the document lifetime. Opens a headless RhinoDoc from `input_path` (creating `doc` internally), then calls `func(doc)` for each func in `funcs` and `exporter(doc, ...)` for each exporter. Wraps in `try/finally` to ensure `doc.Dispose()` always runs. Callers never touch `doc` directly.
-- [ ] Write stub + docstring
+- [x] Write stub + docstring
 
 #### `doc_batcher(input_path: str, output_path: str, operations: list)`
 Top-level orchestrator. For each file in `create_file_list(input_path)`:
 - Call `process_document(file, funcs=operations, exporters=[...])`
 - Catch exceptions, write to `error_log.txt` in `output_path`
 
-- [ ] Write stub + docstring
+- [x] Write stub + docstring
 
 ---
 
@@ -111,22 +111,23 @@ Replace current placeholder content. Keep the `sys.path.append` import pattern.
 ### Tests for `create_file_list`
 Use `tests/dwgs/` as a real fixture directory (9 `.dwg` files).
 
-- [ ] `test_create_file_list_returns_full_paths` — all returned paths are absolute
-- [ ] `test_create_file_list_sorted` — results are sorted
-- [ ] `test_create_file_list_extension_filter` — filter to `.dwg` returns 9 files from `tests/dwgs/`
-- [ ] `test_create_file_list_empty_dir(tmp_path)` — empty directory returns `[]`
-- [ ] `test_create_file_list_case_insensitive_ext(tmp_path)` — `.DWG` and `.dwg` both matched when filtering for `'dwg'`
+- [x] `test_create_file_list_returns_full_paths` — all returned paths are absolute
+- [x] `test_create_file_list_sorted` — results are sorted
+- [x] `test_create_file_list_extension_filter` — filter to `.dwg` returns 9 files from `tests/dwgs/`
+- [x] `test_create_file_list_empty_dir(tmp_path)` — empty directory returns `[]`
+- [x] `test_create_file_list_case_insensitive_ext(tmp_path)` — `.DWG` and `.dwg` both matched when filtering for `'dwg'`
 
 ### Tests for `filter_extension`
-- [ ] `test_filter_extension_matches` — returns paths matching the given extension
-- [ ] `test_filter_extension_no_matches` — returns `[]` when nothing matches
-- [ ] `test_filter_extension_multiple_extensions` — all extensions in the list are matched
+- [x] `test_filter_extension_matches` — returns paths matching the given extension
+- [x] `test_filter_extension_no_matches` — returns `[]` when nothing matches
+- [x] `test_filter_extension_multiple_extensions` — all extensions in the list are matched
 
 ### Tests for `filter_files_with_matching_3dm`
-- [ ] `test_no_matching_3dm_files_returned(tmp_path)` — dwg with no `.3dm` alongside → included in result
-- [ ] `test_matched_file_excluded(tmp_path)` — dwg with matching `_sv.3dm` alongside → excluded from result
-- [ ] `test_custom_suffix(tmp_path)` — custom suffix works correctly
-- [ ] `test_partial_suffix_not_matched(tmp_path)` — `file.dwg` + `file.3dm` (no suffix) → not a match, file still included
+- [x] `test_no_matching_3dm_files_returned(tmp_path)` — dwg with no `.3dm` alongside → included in result
+- [x] `test_matched_file_excluded(tmp_path)` — dwg with matching `_sv.3dm` alongside → excluded from result
+- [x] `test_custom_suffix(tmp_path)` — custom suffix works correctly
+- [x] `test_partial_suffix_not_matched(tmp_path)` — `file.dwg` + `file.3dm` (no suffix) → not a match, file still included
+- [x] `test_variant_suffix_excluded(tmp_path)` — `file_sv-elevation.3dm` counts as a match for `file.dwg`
 
 ---
 
