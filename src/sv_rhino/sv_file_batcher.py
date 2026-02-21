@@ -316,7 +316,7 @@ def svg_exporter(doc, orig_filename, suffixes):
         Rhino.FileIO.FileSvg.Write(out_path, doc, opts)
 
 
-def process_document(input_path, funcs, exporters):
+def process_document(input_path, funcs, exporters, output_path=None):
     """
     Rhino-dependent. Own the lifetime of a RhinoDoc opened from input_path.
 
@@ -330,8 +330,11 @@ def process_document(input_path, funcs, exporters):
         input_path: absolute path to the input file
         funcs: list of callables accepting (doc,)
         exporters: list of callables accepting (doc, orig_filename)
+        output_path: directory to write exports to; defaults to input file's directory
     """
-    orig_filename = os.path.splitext(input_path)[0]
+    stem = os.path.splitext(os.path.basename(input_path))[0]
+    out_dir = output_path if output_path is not None else os.path.dirname(input_path)
+    orig_filename = os.path.join(out_dir, stem)
     doc = Rhino.RhinoDoc.CreateHeadless(None)
     try:
         doc.Import(input_path)
@@ -368,7 +371,7 @@ def doc_batcher(input_path, output_path, operations, exporters=None):
     open(error_log_path, "w").close()
     for file_path in files:
         try:
-            process_document(file_path, funcs=operations, exporters=exporters)
+            process_document(file_path, funcs=operations, exporters=exporters, output_path=output_path)
         except Exception as e:
             with open(error_log_path, "a") as f:
                 f.write(f"{file_path}: {e}\n")

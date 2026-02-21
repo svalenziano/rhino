@@ -75,8 +75,8 @@ def test_doc_batcher_calls_process_for_each_file(tmp_path):
         batcher.doc_batcher("/input", str(tmp_path), operations=[])
 
     assert mock_proc.call_count == 2
-    mock_proc.assert_any_call("/input/a.dwg", funcs=[], exporters=[])
-    mock_proc.assert_any_call("/input/b.dwg", funcs=[], exporters=[])
+    mock_proc.assert_any_call("/input/a.dwg", funcs=[], exporters=[], output_path=str(tmp_path))
+    mock_proc.assert_any_call("/input/b.dwg", funcs=[], exporters=[], output_path=str(tmp_path))
 
 
 def test_doc_batcher_skips_already_processed(tmp_path):
