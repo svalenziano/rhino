@@ -2,8 +2,15 @@ WORK IN PROGRESS (Sorry for the mess)
 
 Misc. scripts for Rhino 3D v.8+
 
+## Setup
+```bash
+pdm install
+pdm run pre-commit install
+```
+
 ## Libraries
 - pytest (testing)
+- pre-commit (git hooks — blocks commits if tests fail)
 
 
 ## File Batcher Goals

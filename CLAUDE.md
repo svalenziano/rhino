@@ -23,10 +23,16 @@ pdm run pytest
 ```
 Tests must pass without a Rhino environment. Rhino-dependent code is guarded by a try/except import block.
 
+## Setup (after cloning)
+```bash
+pdm install
+pdm run pre-commit install
+```
+
 ## Key Conventions
 - **Snake_case** for all function names (e.g. `by_parent`, not `byParent`)
 - **Rhino import guard:** wrap all Rhino/System imports in `try/except ImportError` so the module can be imported in a pure-Python test environment
-- **Test imports:** tests add `src/sv_rhino/` to `sys.path` via `sys.path.append` (no `__init__.py` needed)
+- **Test imports:** use `from sv_rhino.x import y` — `pyproject.toml` adds `src/` to pytest's path automatically
 - **Full paths:** `create_file_list` and similar functions return absolute paths, not bare filenames
 - **Package manager:** PDM (`pdm run pytest`, `pdm add <pkg>`) — not pip or poetry
 
