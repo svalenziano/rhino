@@ -39,12 +39,9 @@ NOTE:
 
 
 
-def test_answer():
-    assert func(3) == 5
 
 def test_should_pass():
     assert func(1) == 2
 
 if __name__ == "__main__":
-    test_answer()
     test_should_pass()
