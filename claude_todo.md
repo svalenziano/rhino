@@ -92,7 +92,7 @@ Same pattern as `dwg_exporter` but exports SVG.
 - [ ] Write stub + docstring
 
 #### `process_document(input_path: str, funcs: list, exporters: list)`
-Opens a headless RhinoDoc from `input_path`, calls each func in `funcs` (passing the doc), calls each exporter in `exporters`, then disposes the doc. Wraps in `try/finally` to ensure `doc.Dispose()`.
+Owns the document lifetime. Opens a headless RhinoDoc from `input_path` (creating `doc` internally), then calls `func(doc)` for each func in `funcs` and `exporter(doc, ...)` for each exporter. Wraps in `try/finally` to ensure `doc.Dispose()` always runs. Callers never touch `doc` directly.
 - [ ] Write stub + docstring
 
 #### `doc_batcher(input_path: str, output_path: str, operations: list)`
