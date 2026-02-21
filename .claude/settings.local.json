@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(pdm run:*)"
+      "Bash(pdm run:*)",
+      "Bash(git add:*)"
     ]
   }
 }

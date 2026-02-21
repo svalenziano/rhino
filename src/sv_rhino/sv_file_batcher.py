@@ -56,7 +56,7 @@ def filter_extension(paths, lst_of_extensions=None):
     return [path
             for path in paths
             for ext in lst_of_extensions
-            if path.endswith(ext)]
+            if os.path.splitext(path)[1].lstrip('.') == ext]
 
 
 def create_file_list(directory_path, extensions=None):
@@ -252,7 +252,7 @@ def process_document(input_path, funcs, exporters):
     Rhino-dependent. Own the lifetime of a RhinoDoc opened from input_path.
 
     Opens the document headlessly, calls func(doc) for each func in funcs,
-    then calls exporter(doc, orig_filename, suffixes) for each exporter.
+    then calls each exporter(doc, orig_filename) in exporters.
     Guarantees doc.Dispose() runs even if an exception occurs.
 
     Callers never touch doc directly.
@@ -269,14 +269,16 @@ def doc_batcher(input_path, output_path, operations):
     """
     Rhino-dependent. Top-level orchestrator for batch processing.
 
-    For each file in create_file_list(input_path):
-      - Calls process_document(file, funcs=operations, exporters=[...])
-      - Catches exceptions and appends them to error_log.txt in output_path
+    Scans input_path for DWG files, skips any that already have a matching
+    _sv.3dm export alongside them, then calls process_document() on each
+    remaining file. Exceptions are caught per-file and appended to
+    error_log.txt in output_path rather than aborting the whole batch.
 
     Args:
         input_path: directory containing input DWG files
-        output_path: directory for output files and error_log.txt
-        operations: list of doc-operation callables to apply to each file
+        output_path: directory for exported files and error_log.txt
+        operations: list of doc-operation callables (e.g. remove_layers,
+                    explode_all_blocks, layer0, join_all, by_parent)
     """
     pass
 
