@@ -372,8 +372,34 @@ def doc_batcher(input_path, output_path, operations, exporters=None):
                 f.write(f"{file_path}: {e}\n")
 
 
+def run():
+    """
+    Interactive entry point for running the batch pipeline from Rhino's script editor.
+    Prompts for input and output folders, then runs doc_batcher with the full
+    default operations list.
+    """
+    import functools
+
+    input_path = pick_folder("Pick input folder (DWG files)")
+    if input_path is None:
+        return
+    output_path = pick_folder("Pick output folder (exports + error_log)")
+    if output_path is None:
+        return
+
+    ops = [
+        explode_all_blocks,
+        layer0,
+        join_all,
+        by_parent,
+    ]
+    exporters = [
+        functools.partial(dwg_exporter, suffixes=["_sv"]),
+    ]
+
+    doc_batcher(input_path, output_path, operations=ops, exporters=exporters)
+    print("Done. Check output folder and error_log.txt if any files failed.")
+
+
 if __name__ == "__main__":
-    folder = os.path.normpath(r"C:\Users\senor\OneDrive\Desktop\temp\rhino test")
-    files = create_file_list(folder, extensions=["dwg"])
-    for f in files:
-        print(f)
+    run()
